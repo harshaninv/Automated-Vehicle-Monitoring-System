@@ -66,6 +66,12 @@ class VehicleResource extends Resource
 
     public static function table(Table $table): Table
     {
+        // of user is vehicle owner, show only their vehicles
+        if (auth()->user()->hasRole('vehicle_owner')) {
+            $table->query(fn (Get $get) => Vehicle::query()
+                ->where('owner_id', auth()->user()->id)
+            );
+        }
         return $table
             ->columns([
                 Tables\Columns\Layout\Stack::make([
