@@ -94,6 +94,18 @@ class TimeLogResource extends Resource
             ]);
     }
 
+    public static function getEloquentQuery(): Builder
+{
+    if (auth()->user()->hasRole('vehicle_owner')) {
+        return parent::getEloquentQuery()
+            ->whereHas('vehicle', function ($query) {
+                $query->where('owner_id', auth()->user()->id);
+            });
+    }
+    return parent::getEloquentQuery()->withoutGlobalScopes();
+}
+
+
     public static function getRelations(): array
     {
         return [
