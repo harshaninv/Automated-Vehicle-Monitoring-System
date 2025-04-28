@@ -10,6 +10,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use App\Enums\VehicleType;
 
 // Import Wizard
 use Filament\Forms\Components\Wizard;
@@ -67,14 +68,21 @@ class GuestResource extends Resource
                             ->icon('heroicon-o-truck')
                             ->description('Enter guest vehicle details')
                             ->schema([
-                                Forms\Components\TextInput::make('vehicle_type')
+                                Forms\Components\Select::make('vehicle_type')
+                                     ->options(
+                                    collect(VehicleType::cases()) // Get all enum cases
+                                    ->mapWithKeys(fn($enum) => [$enum->value => $enum->getLabel()])
+                                    ->toArray()
+                                )
+                                    ->required()
                                     ->label('Vehicle Type')
-                                    ->required()
-                                    ->placeholder('car, bike, van, etc.'),
+                                    ->placeholder('Select an option'),
+
                                 Forms\Components\TextInput::make('license_plate')
-                                    ->label('License Plate Number')
-                                    ->required()
-                                    ->placeholder('e.g., ABC-1234'),
+                                    ->regex('/^([A-Z]{1,2})\s([A-Z]{1,3})\s([0-9]{4}(?<!0{4}))/')
+                                    ->unique('vehicles', 'license_plate')
+                                    ->placeholder('WP ABC XXXX')
+                                    ->required(),
                             ]),
                     ])
                     ->columnSpan('full')
