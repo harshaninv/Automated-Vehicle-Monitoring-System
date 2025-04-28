@@ -105,22 +105,18 @@ class GuestResource extends Resource
                 Tables\Columns\TextColumn::make('address')
                     ->wrap()
                     ->searchable(),
-                Tables\Columns\TextColumn::make('vehicle_type')
+                Tables\Columns\TextColumn::make('type')
                     ->label('Vehicle Type')
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('license_plate')
                     ->label('License Plate')
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('updated_at')
                     ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->searchable(),
             ])
             ->filters([
                 //
