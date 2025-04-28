@@ -36,58 +36,77 @@ class GuestResource extends Resource
                                 Forms\Components\TextInput::make('name')
                                     ->required()
                                     ->label('Full Name'),
-                                Forms\Components\TextInput::make('nic')
+
+                                    Forms\Components\TextInput::make('nic')
                                     ->required()
                                     ->label('NIC Number')
-                                    ->rule(function () {
-                                        return function (string $attribute, $value, $fail) {
-                                            if (\App\Models\User::where('nic', $value)->exists()) {
-                                                $fail('This NIC already exists.');
+                                    ->rule(function (Forms\Get $get, ?Guest $record) {
+                                        return function (string $attribute, $value, $fail) use ($record) {
+                                            $queryGuest = \App\Models\Guest::where('nic', $value);
+                                            $queryUser = \App\Models\User::where('nic', $value);
+                                
+                                            if ($record) {
+                                                $queryGuest->where('id', '!=', $record->id);
                                             }
-                                            if (\App\Models\Guest::where('nic', $value)->exists()) {
+                                
+                                            if ($queryGuest->exists() || $queryUser->exists()) {
                                                 $fail('This NIC already exists.');
                                             }
                                         };
                                     }),
+
                                 Forms\Components\TextInput::make('phone')
                                     ->tel()
                                     ->required()
                                     ->label('Phone Number')
-                                    ->rule(function () {
-                                        return function (string $attribute, $value, $fail) {
-                                            if (\App\Models\Guest::where('phone', $value)->exists()) {
+                                    ->rule(function (Forms\Get $get, ?Guest $record) {
+                                        return function (string $attribute, $value, $fail) use ($record) {
+                                            $query = \App\Models\Guest::where('phone', $value);
+
+                                            if ($record) {
+                                                $query->where('id', '!=', $record->id);
+                                            }
+
+                                            if ($query->exists()) {
                                                 $fail('This Phone Number already exists.');
                                             }
                                         };
                                     }),
+
                                 Forms\Components\TextInput::make('address')
                                     ->required()
                                     ->label('Address'),
                             ]),
+
                         Step::make('Vehicle Information')
                             ->icon('heroicon-o-truck')
                             ->description('Enter guest vehicle details')
                             ->schema([
-                                Forms\Components\Select::make('vehicle_type')
-                                     ->options(
-                                    collect(VehicleType::cases()) // Get all enum cases
-                                    ->mapWithKeys(fn($enum) => [$enum->value => $enum->getLabel()])
-                                    ->toArray()
-                                )
-                                    ->required()
-                                    ->label('Vehicle Type')
-                                    ->placeholder('Select an option'),
+                                Forms\Components\Repeater::make('vehicles')
+                                    ->relationship()
+                                    ->schema([
+                                        Forms\Components\Select::make('type')
+                                            ->options(
+                                                collect(VehicleType::cases())
+                                                    ->mapWithKeys(fn($enum) => [$enum->value => $enum->getLabel()])
+                                                    ->toArray()
+                                            )
+                                            ->required()
+                                            ->label('Vehicle Type')
+                                            ->placeholder('Select an option'),
 
-                                Forms\Components\TextInput::make('license_plate')
-                                    ->regex('/^([A-Z]{1,2})\s([A-Z]{1,3})\s([0-9]{4}(?<!0{4}))/')
-                                    ->unique('vehicles', 'license_plate')
-                                    ->placeholder('WP ABC XXXX')
-                                    ->required(),
+                                        Forms\Components\TextInput::make('license_plate')
+                                            ->regex('/^([A-Z]{1,2})\s([A-Z]{1,3})\s([0-9]{4}(?<!0{4}))/')
+                                            ->unique('vehicles', 'license_plate')
+                                            ->placeholder('WP ABC XXXX')
+                                            ->required(),
+                                    ])
+                                    ->label('Vehicles'),
                             ]),
                     ])
                     ->columnSpan('full')
                     ->columns(1)
-                    ->maxWidth('7xl'),
+                    ->maxWidth('7xl')
             ]);
     }
 
@@ -105,10 +124,10 @@ class GuestResource extends Resource
                 Tables\Columns\TextColumn::make('address')
                     ->wrap()
                     ->searchable(),
-                Tables\Columns\TextColumn::make('type')
+                Tables\Columns\TextColumn::make('vehicles.type')
                     ->label('Vehicle Type')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('license_plate')
+                Tables\Columns\TextColumn::make('vehicles.license_plate')
                     ->label('License Plate')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
