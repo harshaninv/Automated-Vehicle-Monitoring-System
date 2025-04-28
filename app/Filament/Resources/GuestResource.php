@@ -97,7 +97,11 @@ class GuestResource extends Resource
 
                                         Forms\Components\TextInput::make('license_plate')
                                             ->regex('/^([A-Z]{1,2})\s([A-Z]{1,3})\s([0-9]{4}(?<!0{4}))/')
-                                            ->unique('vehicles', 'license_plate')
+                                            ->unique(
+                                                table: 'vehicles',
+                                                column: 'license_plate',
+                                                ignoreRecord: true,
+                                            )
                                             ->placeholder('WP ABC XXXX')
                                             ->required(),
                                     ])
