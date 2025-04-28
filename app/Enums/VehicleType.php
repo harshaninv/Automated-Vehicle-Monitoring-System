@@ -13,8 +13,15 @@ enum VehicleType: String implements HasLabel
     case Bicycle = 'bicycle';
     case Other = 'other';
 
-    public function getLabel(): ?string
+    public function getLabel(): string
     {
-        return $this->name;
+        return match($this) {
+            self::Car => 'Car',
+            self::Van => 'Van',
+            self::Motorcycle => 'Motorcycle',
+            self::Truck => 'Truck',
+            self::Bicycle => 'Bicycle',
+            self::Other => 'Other',
+        };
     }
 }
