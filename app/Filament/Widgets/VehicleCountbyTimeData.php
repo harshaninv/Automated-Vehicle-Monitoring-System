@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 
 class VehicleCountbyTimeData extends ChartWidget
 {
+    protected string | array | int $columnSpan = '2';
     protected static ?string $heading = 'Vehicle Count by Time';
 
     public ?string $filter = 'today'; // default filter
