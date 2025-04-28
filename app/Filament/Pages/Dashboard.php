@@ -2,20 +2,22 @@
 
 namespace App\Filament\Pages;
 
-use Illuminate\Support\Facades\Auth;
+use Filament\Pages\Dashboard as BaseDashboard;
+use App\Filament\Widgets\UserInfoWidget;
+use App\Filament\Widgets\StatsOverview;
+use App\Filament\Widgets\VehicleCountbyTimeData;
 
-class Dashboard extends \Filament\Pages\Dashboard
+class Dashboard extends BaseDashboard
 {
     protected static string $view = 'filament-panels::pages.dashboard';
 
-
-    // UserInfoWidget is a custom widget that displays the user's details
     public function getWidgets(): array
     {
         return [
-            \App\Filament\Widgets\UserInfoWidget::class,
+            UserInfoWidget::class,
+            StatsOverview::class,
+            VehicleCountbyTimeData::class,
         ];
     }
-    
-}
 
+}
