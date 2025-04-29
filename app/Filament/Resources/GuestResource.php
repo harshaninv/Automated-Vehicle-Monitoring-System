@@ -4,15 +4,13 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\GuestResource\Pages;
 use App\Models\Guest;
+use App\Enums\VehicleType;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use App\Enums\VehicleType;
-
-// Import Wizard
 use Filament\Forms\Components\Wizard;
 use Filament\Forms\Components\Wizard\Step;
 
@@ -37,18 +35,18 @@ class GuestResource extends Resource
                                     ->required()
                                     ->label('Full Name'),
 
-                                    Forms\Components\TextInput::make('nic')
+                                Forms\Components\TextInput::make('nic')
                                     ->required()
                                     ->label('NIC Number')
                                     ->rule(function (Forms\Get $get, ?Guest $record) {
                                         return function (string $attribute, $value, $fail) use ($record) {
                                             $queryGuest = \App\Models\Guest::where('nic', $value);
                                             $queryUser = \App\Models\User::where('nic', $value);
-                                
+
                                             if ($record) {
                                                 $queryGuest->where('id', '!=', $record->id);
                                             }
-                                
+
                                             if ($queryGuest->exists() || $queryUser->exists()) {
                                                 $fail('This NIC already exists.');
                                             }
@@ -81,36 +79,67 @@ class GuestResource extends Resource
                         Step::make('Vehicle Information')
                             ->icon('heroicon-o-truck')
                             ->description('Enter guest vehicle details')
-                            ->schema([
-                                Forms\Components\Repeater::make('vehicles')
-                                    ->relationship()
-                                    ->schema([
-                                        Forms\Components\Select::make('type')
-                                            ->options(
-                                                collect(VehicleType::cases())
-                                                    ->mapWithKeys(fn($enum) => [$enum->value => $enum->getLabel()])
-                                                    ->toArray()
-                                            )
-                                            ->required()
-                                            ->label('Vehicle Type')
-                                            ->placeholder('Select an option'),
+                            ->schema(function (?Guest $record) {
+                                if ($record) {
+                                    // Editing: show Repeater
+                                    return [
+                                        Forms\Components\Repeater::make('vehicles')
+                                            ->relationship('vehicles')
+                                            ->schema([
+                                                Forms\Components\Select::make('type')
+                                                    ->options(
+                                                        collect(VehicleType::cases())
+                                                            ->mapWithKeys(fn($enum) => [$enum->value => $enum->getLabel()])
+                                                            ->toArray()
+                                                    )
+                                                    ->required()
+                                                    ->label('Vehicle Type')
+                                                    ->placeholder('Select an option'),
 
-                                        Forms\Components\TextInput::make('license_plate')
-                                            ->regex('/^([A-Z]{1,2})\s([A-Z]{1,3})\s([0-9]{4}(?<!0{4}))/')
-                                            ->unique(
-                                                table: 'vehicles',
-                                                column: 'license_plate',
-                                                ignoreRecord: true,
-                                            )
-                                            ->placeholder('WP ABC XXXX')
-                                            ->required(),
-                                    ])
-                                    ->label('Vehicles'),
-                            ]),
+                                                Forms\Components\TextInput::make('license_plate')
+                                                    ->regex('/^([A-Z]{1,2})\s([A-Z]{1,3})\s([0-9]{4}(?<!0{4}))/')
+                                                    ->unique(
+                                                        table: 'vehicles',
+                                                        column: 'license_plate',
+                                                        ignoreRecord: true,
+                                                    )
+                                                    ->placeholder('WP ABC XXXX')
+                                                    ->required(),
+                                            ])
+                                            ->label('Vehicles'),
+                                    ];
+                                } else {
+                                    // Creating: show single vehicle fields
+                                    return [
+                                        Forms\Components\Group::make([
+                                            Forms\Components\Select::make('type')
+                                                ->options(
+                                                    collect(VehicleType::cases())
+                                                        ->mapWithKeys(fn($enum) => [$enum->value => $enum->getLabel()])
+                                                        ->toArray()
+                                                )
+                                                ->required()
+                                                ->label('Vehicle Type')
+                                                ->placeholder('Select an option'),
+
+                                            Forms\Components\TextInput::make('license_plate')
+                                                ->regex('/^([A-Z]{1,2})\s([A-Z]{1,3})\s([0-9]{4}(?<!0{4}))/')
+                                                ->unique(
+                                                    table: 'vehicles',
+                                                    column: 'license_plate',
+                                                    ignoreRecord: true,
+                                                )
+                                                ->placeholder('WP ABC XXXX')
+                                                ->required(),
+                                        ])
+                                        ->label('Vehicles'),
+                                    ];
+                                }
+                            }),
                     ])
                     ->columnSpan('full')
                     ->columns(1)
-                    ->maxWidth('7xl')
+                    ->maxWidth('7xl'),
             ]);
     }
 
