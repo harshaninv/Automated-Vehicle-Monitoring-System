@@ -2,8 +2,12 @@
 
 namespace App\Enums;
 
+use Mokhosh\FilamentKanban\Concerns\IsKanbanStatus;
+
 enum UserStatus: string
 {
+    use IsKanbanStatus;
+    
     case Pending = 'pending';
     case Approved = 'approved';
     case Rejected = 'rejected';
