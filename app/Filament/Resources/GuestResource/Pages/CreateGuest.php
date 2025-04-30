@@ -35,12 +35,12 @@ class CreateGuest extends CreateRecord
 
         // Save vehicle info separately (we'll create vehicle after guest is created)
         $this->vehicleData = [
-            'type' => $data['vehicle_type'],
+            'type' => $data['type'],
             'license_plate' => $data['license_plate'],
         ];
 
         // Remove vehicle fields from $data (because Guest table does not have them)
-        unset($data['vehicle_type'], $data['license_plate']);
+        unset($data['type'], $data['license_plate']);
 
         return $data;
     }
