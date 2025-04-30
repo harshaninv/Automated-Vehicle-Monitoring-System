@@ -4,14 +4,14 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\UserResource\Pages;
 use App\Models\User;
-use App\Enums\UserStatus; // Import the UserStatus Enum
+use App\Enums\UserStatus;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Mokhosh\FilamentKanban\Concerns\IsKanbanStatus;
-use Spatie\Permission\Models\Role; // Correctly import Role model
+use Spatie\Permission\Models\Role;
 
 class UserResource extends Resource
 {
@@ -38,7 +38,7 @@ class UserResource extends Resource
                 Forms\Components\TextInput::make('nic')->required(),
                 Forms\Components\TextInput::make('password')->password()->required()->visibleOn('create'),
                 Forms\Components\Select::make('roles')->relationship('roles', 'name')->preload()->required()->multiple()->live()
-                    ->options(Role::all()->pluck('name', 'id')), // Correct Role model usage
+                    ->options(Role::all()->pluck('name', 'id')),
             ]);
     }
 
@@ -46,9 +46,9 @@ class UserResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name')->searchable(),
+                Tables\Columns\TextColumn::make('name')->sortable(),
                 Tables\Columns\TextColumn::make('email')->searchable(),
-                Tables\Columns\TextColumn::make('status')->label('Status')->sortable(),
+                Tables\Columns\TextColumn::make('status')->label('Status')->searchable(),
                 Tables\Columns\TextColumn::make('phone')->searchable(),
                 Tables\Columns\TextColumn::make('address')->searchable(),
             ])
@@ -72,6 +72,7 @@ class UserResource extends Resource
     {
         return [
             'index' => Pages\ListUsers::route('/'),
+            'kanban' => Pages\UserKanban::route('/kanban'),
             'create' => Pages\CreateUser::route('/create'),
             'edit' => Pages\EditUser::route('/{record}/edit'),
         ];
