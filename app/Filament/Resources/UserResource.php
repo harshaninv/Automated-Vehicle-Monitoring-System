@@ -4,8 +4,6 @@ namespace App\Filament\Resources;
 
 use App\Enums\UserStatus;
 use App\Filament\Resources\UserResource\Pages;
-use App\Models\Staff;
-use App\Models\Student;
 use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -74,47 +72,75 @@ class UserResource extends Resource
                     UserStatus::REJECTED->value => 'Rejected',
                 ])
                 ->required(),
-
+            
                 Forms\Components\Select::make('user_type')
                 ->label('User Type')
+                ->required()
                 ->options([
                     'student' => 'Student',
                     'staff' => 'Staff',
                 ])
                 ->reactive()
-                ->required()
-                ->default(function ($get, $record) {
-                    // If the record exists, check the associated user type (student or staff)
-                    if ($record) {
-                        if ($record->student && $record->student->user_id === $record->id) {
-                            return 'student';
-                        } elseif ($record->staff && $record->staff->user_id === $record->id) {
-                            return 'staff';
-                        }
-                    }
-                })
+                ->visible(fn ($record) => $record === null) // only visible on create
                 ->afterStateUpdated(function ($state, $set) {
-                    // Reset occupation and registration_number when the user type is updated
                     $set('occupation', null);
                     $set('registration_number', null);
                 }),
             
-            // Occupation field (for staff only)
-            Forms\Components\TextInput::make('occupation')
-                ->label('Occupation')
-                ->required()
-                ->visible(fn ($get) => $get('user_type') === 'staff') // Visible when user_type is 'staff'
-                ->default(fn ($get, $record) => $record && $record->staff ? $record->staff->occupation : null),
+            // Hidden/disabled field for user_type on edit (auto-detected)
+            Forms\Components\TextInput::make('user_type')
+                ->label('User Type')
+                ->visible(fn ($record) => $record !== null) // only on edit
+                ->afterStateHydrated(function ($component, $record) {
+                    if ($record) {
+                        $user_id = $record->id;
+                        if (\App\Models\Student::where('user_id', $user_id)->exists()) {
+                            $component->state('Student');
+                        } elseif (\App\Models\Staff::where('user_id', $user_id)->exists()) {
+                            $component->state('Staff');
+                        } else {
+                            $component->state('Unknown');
+                        }
+                    }
+                }),
             
-            // Registration Number (for students only)
+            // Occupation (for staff only)
+            Forms\Components\TextInput::make('occupation')
+            ->label('Occupation')
+            ->required(fn ($get) => $get('user_type') === 'staff')
+            ->visible(function ($get, $record) {
+                return $get('user_type') === 'staff' ||
+                ($record && \App\Models\Staff::where('user_id', $record->id)->exists());
+            })
+            ->reactive()
+            ->afterStateHydrated(function ($component, $record) {
+                if ($record) {
+                $occupation = \Illuminate\Support\Facades\DB::table('staff')
+                    ->where('user_id', $record->id)
+                    ->value('occupation');
+                $component->state($occupation);
+                }
+            }),
+            
+            // Registration No (for student only)
             Forms\Components\TextInput::make('registration_number')
                 ->label('Registration No')
-                ->required()
-                ->visible(fn ($get) => $get('user_type') === 'student') // Visible when user_type is 'student'
-                ->default(fn ($get, $record) => $record && $record->student ? $record->student->registration_number : null),
+                ->required(fn ($get) => $get('user_type') === 'student')
+                ->visible(function ($get, $record) {
+                    return $get('user_type') === 'student' ||
+                    ($record && \App\Models\Student::where('user_id', $record->id)->exists());
+                })
+                ->reactive()
+                ->afterStateHydrated(function ($component, $record) {
+                if ($record) {
+                $regNo = \Illuminate\Support\Facades\DB::table('students')
+                    ->where('user_id', $record->id)
+                    ->value('uni_reg_no');
+                $component->state($regNo);
+                }
+            }),
         ]);
     }
-
     public static function table(Table $table): Table
     {
         return $table
@@ -144,6 +170,7 @@ class UserResource extends Resource
                             default => 'gray',
                         }),
                 ]),
+
             ])
             ->contentGrid(['md' => 2, 'xl' => 3])
             ->filters([
@@ -181,6 +208,7 @@ class UserResource extends Resource
 
         return parent::getEloquentQuery()->withoutGlobalScopes();
     }
+
 
     public static function getPages(): array
     {
