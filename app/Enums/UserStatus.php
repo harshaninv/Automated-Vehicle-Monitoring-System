@@ -2,18 +2,18 @@
 
 namespace App\Enums;
 
-use Mokhosh\FilamentKanban\Concerns\IsKanbanStatus;
-
 enum UserStatus: string
 {
-    use IsKanbanStatus;
-    
-    case Pending = 'pending';
-    case Approved = 'approved';
-    case Rejected = 'rejected';
+    case PENDING = 'pending';
+    case APPROVED = 'approved';
+    case REJECTED = 'rejected';
 
-    public static function values(): array
+    public function label(): string
     {
-        return array_column(self::cases(), 'value');
+        return match($this) {
+            self::PENDING => 'Pending',
+            self::APPROVED => 'Approved',
+            self::REJECTED => 'Rejected',
+        };
     }
 }
