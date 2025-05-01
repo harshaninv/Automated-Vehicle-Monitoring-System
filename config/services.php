@@ -35,4 +35,8 @@ return [
         ],
     ],
 
+    'plate-recognition' => [
+        'api_key' => env('PLATE_RECOGNITION_API_KEY'),
+        'api_url' => env('PLATE_RECOGNITION_API_URL', 'https://api.platerecognizer.com/v1/plate-reader'),
+    ],
 ];

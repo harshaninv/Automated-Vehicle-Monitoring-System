@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\TimeLogResource\Pages;
 use App\Filament\Resources\TimeLogResource\RelationManagers;
+use App\Forms\Components\NumberPlateScanner;
 use App\Models\TimeLog;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -26,13 +27,10 @@ class TimeLogResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Select::make('vehicle_id')
-                    ->label('Vehicle')
+                Forms\Components\Select::make('plate_number')
+                    ->label('Vehicle License Plate')
                     ->relationship('vehicle', 'license_plate')
                     ->searchable()
-                    ->required(),
-                Forms\Components\DateTimePicker::make('time_in')
-                    ->default(now())
                     ->required(),
             ]);
     }
@@ -95,15 +93,15 @@ class TimeLogResource extends Resource
     }
 
     public static function getEloquentQuery(): Builder
-{
-    if (auth()->user()->hasRole('vehicle_owner')) {
-        return parent::getEloquentQuery()
-            ->whereHas('vehicle', function ($query) {
-                $query->where('owner_id', auth()->user()->id);
-            });
+    {
+        if (auth()->user()->hasRole('vehicle_owner')) {
+            return parent::getEloquentQuery()
+                ->whereHas('vehicle', function ($query) {
+                    $query->where('owner_id', auth()->user()->id);
+                });
+        }
+        return parent::getEloquentQuery()->withoutGlobalScopes();
     }
-    return parent::getEloquentQuery()->withoutGlobalScopes();
-}
 
 
     public static function getRelations(): array
