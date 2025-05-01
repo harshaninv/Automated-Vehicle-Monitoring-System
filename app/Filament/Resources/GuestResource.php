@@ -163,12 +163,6 @@ class GuestResource extends Resource
                 Tables\Columns\TextColumn::make('vehicles.license_plate')
                     ->label('License Plate')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->searchable(),
             ])
             ->filters([
                 //
