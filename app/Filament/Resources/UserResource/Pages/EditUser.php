@@ -6,10 +6,18 @@ use App\Filament\Resources\UserResource;
 use App\Models\Staff;
 use App\Models\Student;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Actions;
 
 class EditUser extends EditRecord
 {
     protected static string $resource = UserResource::class;
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            Actions\DeleteAction::make(),
+        ];
+    }
 
     protected function afterSave(): void
     {
