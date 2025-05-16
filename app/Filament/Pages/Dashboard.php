@@ -13,11 +13,19 @@ class Dashboard extends BaseDashboard
 
     public function getWidgets(): array
     {
-        return [
-            UserInfoWidget::class,
-            StatsOverview::class,
-            VehicleCountbyTimeData::class,
-        ];
+        $user = auth() -> user();
+        $widgets = [];
+
+        if ($user -> role == 'vehicle_owner'){
+            $widgets[] = UserInfoWidget::class;
+        }
+        else {
+            $widgets[] = UserInfoWidget::class;
+            $widgets[] = StatsOverview::class;
+            $widgets[] = VehicleCountbyTimeData::class;
+        }
+
+        return $widgets;
     }
 
 }
