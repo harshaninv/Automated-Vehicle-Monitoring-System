@@ -96,7 +96,7 @@ $guestVehiclesOut = TimeLog::whereDate('time_out', $today)
                 ->icon('heroicon-o-truck')
                 ->description("Students' Vehicles Out: {$studentVehiclesOut}")
                 ->descriptionIcon('heroicon-m-arrow-trending-down')
-                ->color('success')
+                ->color('primary')
                 ->chart([2,1]),
 
             // number of remaing vehicles in university calculated by subtracting the total vehicles in from the total vehicles out for each user type guest, staff, student
@@ -104,7 +104,7 @@ $guestVehiclesOut = TimeLog::whereDate('time_out', $today)
             ->icon('heroicon-o-truck')
             ->description("Students: {$remainingStudents}, Staff: {$remainingStaff}, Guests: {$remainingGuests}")
             ->descriptionIcon('heroicon-o-information-circle')
-            ->color('warning')
+            ->color('primary')
             ->descriptionIcon('heroicon-o-light-bulb'),
                 
 

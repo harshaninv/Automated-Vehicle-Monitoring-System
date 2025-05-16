@@ -154,6 +154,10 @@ class UserResource extends Resource
                         ->color('gray')
                         ->searchable(),
 
+                    Tables\Columns\TextColumn::make('role')
+                        ->color('info')
+                        ->formatStateUsing(fn(string $state) => "Role - {$state}"),
+
                     Tables\Columns\TextColumn::make('created_at')
                         ->label('Registered At')
                         ->dateTime()
