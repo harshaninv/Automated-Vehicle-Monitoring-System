@@ -10,7 +10,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
+use Filament\Tables\Columns\RepeaterColumn;
 use Filament\Forms\Components\Wizard;
 use Filament\Forms\Components\Wizard\Step;
 
@@ -157,18 +157,15 @@ class GuestResource extends Resource
                 Tables\Columns\TextColumn::make('address')
                     ->wrap()
                     ->searchable(),
-                Tables\Columns\TextColumn::make('vehicles.type')
-                    ->label('Vehicle Type')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('vehicles.license_plate')
-                    ->label('License Plate')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->searchable(),
+                Tables\Columns\TextColumn::make('vehicles')
+                    ->label('Vehicles')
+                    ->formatStateUsing(function ($record) {
+                        return $record->vehicles
+                            ->map(fn ($v) => "{$v->type->getLabel()} ({$v->license_plate})")
+                            ->implode('<br>');
+                    })
+                    ->html()
+                    ->wrap(),
             ])
             ->filters([
                 //
